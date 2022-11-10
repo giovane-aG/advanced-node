@@ -1,24 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import { AuthenticationError } from '../../../src/domain/errors'
 import { FacebookAuthentication } from '../../../src/domain/features'
+import { LoadFacebookUserApi } from '../../../src/data/contracts/apis'
 
-interface LoadFacebookUser {
-  loadUser: (params: LoadFacebookUser.Params) => Promise<void>
-}
-
-namespace LoadFacebookUser {
-  export type Params = {
-    token: string
-  }
-
-  export type Result = undefined
-}
-
-class LoadFacebookUserApiSpy implements LoadFacebookUser {
+class LoadFacebookUserApiSpy implements LoadFacebookUserApi {
   token?: string
   result = undefined
 
-  async loadUser (params: LoadFacebookUser.Params): Promise<LoadFacebookUser.Result> {
+  async loadUser (params: LoadFacebookUserApi.Params): Promise<LoadFacebookUserApi.Result> {
     this.token = params.token
     return this.result
   }
@@ -27,7 +16,7 @@ class LoadFacebookUserApiSpy implements LoadFacebookUser {
 class FacebookAuthenticationService {
 
   constructor (
-    private readonly loadFacebookUserByTokenApi: LoadFacebookUser
+    private readonly loadFacebookUserByTokenApi: LoadFacebookUserApi
   ) {}
 
   async perform(params: FacebookAuthentication.Params): Promise<AuthenticationError> {
