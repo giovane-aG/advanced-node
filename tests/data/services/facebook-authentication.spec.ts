@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { AuthenticationError } from '../../../src/domain/errors'
 import { FacebookAuthentication } from '../../../src/domain/features'
 import { LoadFacebookUserApi } from '../../../src/data/contracts/apis'
+import { FacebookAuthenticationService } from '../../../src/data/services'
 
 class LoadFacebookUserApiSpy implements LoadFacebookUserApi {
   token?: string
@@ -10,18 +11,6 @@ class LoadFacebookUserApiSpy implements LoadFacebookUserApi {
   async loadUser (params: LoadFacebookUserApi.Params): Promise<LoadFacebookUserApi.Result> {
     this.token = params.token
     return this.result
-  }
-}
-
-class FacebookAuthenticationService {
-
-  constructor (
-    private readonly loadFacebookUserByTokenApi: LoadFacebookUserApi
-  ) {}
-
-  async perform(params: FacebookAuthentication.Params): Promise<AuthenticationError> {
-    await this.loadFacebookUserByTokenApi.loadUser(params)
-    return new AuthenticationError()
   }
 }
 
