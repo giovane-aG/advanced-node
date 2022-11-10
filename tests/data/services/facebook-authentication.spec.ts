@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vitest } from 'vitest'
 import { AuthenticationError } from '../../../src/domain/errors'
 import { FacebookAuthentication } from '../../../src/domain/features'
 import { LoadFacebookUserApi } from '../../../src/data/contracts/apis'
@@ -19,10 +19,12 @@ describe('Facebook Authentication', () => {
   it('should have the same token as the one provided', async () => {
     const loadFacebookUserApiSpy = new LoadFacebookUserApiSpy()
     const sut = new FacebookAuthenticationService(loadFacebookUserApiSpy)
+    vitest.spyOn(loadFacebookUserApiSpy, 'loadUser')
 
     await sut.perform({ token: 'any_token' })
 
     expect(loadFacebookUserApiSpy.token).toBe('any_token')
+    expect(loadFacebookUserApiSpy.loadUser).toHaveBeenCalledTimes(1)
   })
 
   it('should throw an AuthenticationError when LoadFacebookUserApi returns undefined', async () => {
