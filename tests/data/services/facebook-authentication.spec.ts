@@ -1,19 +1,20 @@
-import { describe, it, expect, vitest, vi } from 'vitest'
+import { describe, it, expect, vitest, vi, beforeEach } from 'vitest'
 import { AuthenticationError } from '../../../src/domain/errors'
 import { FacebookAuthentication } from '../../../src/domain/features'
 import { LoadFacebookUserApi } from '../../../src/data/contracts/apis'
 import { FacebookAuthenticationService } from '../../../src/data/services'
 
-const makeSut = () => {
-  const loadFacebookUserApiSpy = { loadUser: vi.fn() }
-  const sut = new FacebookAuthenticationService(loadFacebookUserApiSpy)
-  return { sut, loadFacebookUserApiSpy }
-}
-
 describe('Facebook Authentication', () => {
 
+  let loadFacebookUserApiSpy: LoadFacebookUserApi
+  let sut: FacebookAuthenticationService
+
+  beforeEach(() => {
+    loadFacebookUserApiSpy = { loadUser: vi.fn() }
+    sut = new FacebookAuthenticationService(loadFacebookUserApiSpy)
+  })
+
   it('should have the same token as the one provided', async () => {
-    const { sut, loadFacebookUserApiSpy } = makeSut()
     vitest.spyOn(loadFacebookUserApiSpy, 'loadUser')
 
     await sut.perform({ token: 'any_token' })
@@ -23,8 +24,7 @@ describe('Facebook Authentication', () => {
   })
 
   it('should throw an AuthenticationError when LoadFacebookUserApi returns undefined', async () => {
-    const { sut, loadFacebookUserApiSpy } = makeSut()
-    loadFacebookUserApiSpy.loadUser.mockResolvedValueOnce(undefined)
+    vi.spyOn(loadFacebookUserApiSpy, 'loadUser').mockResolvedValueOnce(undefined)
     const authResult = await sut.perform({ token: 'any_token' })
 
     expect(authResult).toBeInstanceOf(AuthenticationError)
