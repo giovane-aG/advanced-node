@@ -1,3 +1,4 @@
+
 export interface LoadUserAccountRepository {
   loadUser: (params: LoadUserAccountRepository.Params) => Promise<LoadUserAccountRepository.Result | undefined>
 }
@@ -14,8 +15,8 @@ export namespace LoadUserAccountRepository {
   }
 }
 
-export interface CreateUserAccountRepository {
-  create: (params: CreateUserAccountRepository.Params) => Promise<void>
+export interface CreateFacebookAccountRepository {
+  createFromFacebook: (params: CreateUserAccountRepository.Params) => Promise<void>
 }
 
 export namespace CreateUserAccountRepository {
