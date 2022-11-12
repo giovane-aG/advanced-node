@@ -11,17 +11,16 @@ import { FacebookAuthenticationService } from "../../../src/data/services";
 describe("Facebook Authentication", () => {
   let loadFacebookUserApiSpy: LoadFacebookUserApi;
   let sut: FacebookAuthenticationService;
-  let loadUserAccountRepoSpy: LoadUserAccountRepository;
-  let createFacebookAccountRepoSpy: CreateFacebookAccountRepository;
+  let userAccountRepoSpy: LoadUserAccountRepository &
+    CreateFacebookAccountRepository;
 
   beforeEach(() => {
     loadFacebookUserApiSpy = { loadUser: vi.fn() };
-    loadUserAccountRepoSpy = { loadUser: vi.fn() };
-    createFacebookAccountRepoSpy = { createFromFacebook: vi.fn() };
+    userAccountRepoSpy = { loadUser: vi.fn(), createFromFacebook: vi.fn() };
+
     sut = new FacebookAuthenticationService(
       loadFacebookUserApiSpy,
-      loadUserAccountRepoSpy,
-      createFacebookAccountRepoSpy
+      userAccountRepoSpy
     );
 
     loadFacebookUserApiSpy.loadUser = vi.fn().mockResolvedValue({
@@ -53,27 +52,21 @@ describe("Facebook Authentication", () => {
 
   it("should call LoadUserAccountRepository when LoadFacebookUserApi returns data", async () => {
     await sut.perform({ token: "any_token" });
-    expect(loadUserAccountRepoSpy.loadUser).toHaveBeenCalledOnce();
-    expect(loadUserAccountRepoSpy.loadUser).toHaveBeenCalledWith({
+    expect(userAccountRepoSpy.loadUser).toHaveBeenCalledOnce();
+    expect(userAccountRepoSpy.loadUser).toHaveBeenCalledWith({
       email: "any_email",
     });
   });
 
   it("should call CreateUserAccountRepo when LoadUserAccountRepo returns data", async () => {
-    vi.spyOn(loadUserAccountRepoSpy, "loadUser").mockResolvedValueOnce(
-      undefined
-    );
+    vi.spyOn(userAccountRepoSpy, "loadUser").mockResolvedValueOnce(undefined);
     await sut.perform({ token: "any_token" });
 
-    expect(
-      createFacebookAccountRepoSpy.createFromFacebook
-    ).toHaveBeenCalledWith({
+    expect(userAccountRepoSpy.createFromFacebook).toHaveBeenCalledWith({
       name: "any_name",
       email: "any_email",
       facebookId: "any_facebook_id",
     });
-    expect(
-      createFacebookAccountRepoSpy.createFromFacebook
-    ).toHaveBeenCalledOnce();
+    expect(userAccountRepoSpy.createFromFacebook).toHaveBeenCalledOnce();
   });
 });
