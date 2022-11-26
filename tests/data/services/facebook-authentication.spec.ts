@@ -31,7 +31,7 @@ describe("Facebook Authentication", () => {
     );
 
     loadFacebookUserApiSpy.loadUser = vi.fn().mockResolvedValue({
-      name: "any_name",
+      name: "any_fb_name",
       email: "any_email",
       facebookId: "any_fb_id",
     });
@@ -70,7 +70,7 @@ describe("Facebook Authentication", () => {
     await sut.perform({ token: "any_token" });
 
     expect(userAccountRepoSpy.createFromFacebook).toHaveBeenCalledWith({
-      name: "any_name",
+      name: "any_fb_name",
       email: "any_email",
       facebookId: "any_fb_id",
     });
@@ -87,6 +87,21 @@ describe("Facebook Authentication", () => {
 
     expect(userAccountRepoSpy.updateWithFacebook).toHaveBeenCalledWith({
       name: "any_name",
+      id: "any_id",
+      facebookId: "any_fb_id",
+    });
+    expect(userAccountRepoSpy.updateWithFacebook).toHaveBeenCalledOnce();
+  });
+
+  it("should update account name", async () => {
+    vi.spyOn(userAccountRepoSpy, "loadUser").mockResolvedValueOnce({
+      id: "any_id",
+    });
+
+    await sut.perform({ token: "any_token" });
+
+    expect(userAccountRepoSpy.updateWithFacebook).toHaveBeenCalledWith({
+      name: "any_fb_name",
       id: "any_id",
       facebookId: "any_fb_id",
     });
