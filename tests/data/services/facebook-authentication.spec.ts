@@ -5,18 +5,25 @@ import { LoadFacebookUserApi } from "../../../src/data/contracts/apis";
 import {
   CreateFacebookAccountRepository,
   LoadUserAccountRepository,
+  UpdateFacebookAccountRepository,
 } from "../../../src/data/contracts/apis/repos";
+
 import { FacebookAuthenticationService } from "../../../src/data/services";
 
 describe("Facebook Authentication", () => {
   let loadFacebookUserApiSpy: LoadFacebookUserApi;
   let sut: FacebookAuthenticationService;
   let userAccountRepoSpy: LoadUserAccountRepository &
-    CreateFacebookAccountRepository;
+    CreateFacebookAccountRepository &
+    UpdateFacebookAccountRepository;
 
   beforeEach(() => {
     loadFacebookUserApiSpy = { loadUser: vi.fn() };
-    userAccountRepoSpy = { loadUser: vi.fn(), createFromFacebook: vi.fn() };
+    userAccountRepoSpy = {
+      loadUser: vi.fn(),
+      createFromFacebook: vi.fn(),
+      updateWithFacebook: vi.fn(),
+    };
 
     sut = new FacebookAuthenticationService(
       loadFacebookUserApiSpy,
@@ -26,7 +33,7 @@ describe("Facebook Authentication", () => {
     loadFacebookUserApiSpy.loadUser = vi.fn().mockResolvedValue({
       name: "any_name",
       email: "any_email",
-      facebookId: "any_facebook_id",
+      facebookId: "any_fb_id",
     });
   });
 
@@ -58,15 +65,31 @@ describe("Facebook Authentication", () => {
     });
   });
 
-  it("should call CreateUserAccountRepo when LoadUserAccountRepo returns data", async () => {
+  it("should call CreateUserAccountRepo when LoadUserAccountRepo returns undefined", async () => {
     vi.spyOn(userAccountRepoSpy, "loadUser").mockResolvedValueOnce(undefined);
     await sut.perform({ token: "any_token" });
 
     expect(userAccountRepoSpy.createFromFacebook).toHaveBeenCalledWith({
       name: "any_name",
       email: "any_email",
-      facebookId: "any_facebook_id",
+      facebookId: "any_fb_id",
     });
     expect(userAccountRepoSpy.createFromFacebook).toHaveBeenCalledOnce();
+  });
+
+  it("should call UpdateUserAccountRepo when LoadUserAccountRepo returns data", async () => {
+    vi.spyOn(userAccountRepoSpy, "loadUser").mockResolvedValueOnce({
+      id: "any_id",
+      name: "any_name",
+    });
+
+    await sut.perform({ token: "any_token" });
+
+    expect(userAccountRepoSpy.updateWithFacebook).toHaveBeenCalledWith({
+      name: "any_name",
+      id: "any_id",
+      facebookId: "any_fb_id",
+    });
+    expect(userAccountRepoSpy.updateWithFacebook).toHaveBeenCalledOnce();
   });
 });
